@@ -209,24 +209,25 @@
       
         <p>用 Ruby on Rails 搭建自己的微信公众号后台，可以玩出许多有意思的东西。</p>
 <a id="more"></a>
-<h1 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h1><ul>
+<h1 id="前期准备">前期准备</h1>
+<ul>
 <li>用自己的服务器搭建起自己 Rails 服务器。</li>
 <li>将域名绑定上自己的服务器。</li>
 <li>有自己的微信公众号</li>
 <li>用 <code>capistrano</code> 进行部署</li>
 </ul>
-<h1 id="安装-wechat-gem"><a href="#安装-wechat-gem" class="headerlink" title="安装 wechat gem"></a>安装 wechat gem</h1><ul>
-<li><p>在 Gem file 里面 加入 <code>gem &#39;wechat&#39;</code></p>
-</li>
+<h1 id="安装-wechat-gem">安装 wechat gem</h1>
+<ul>
+<li><p>在 Gem file 里面 加入 <code>gem 'wechat'</code></p></li>
 <li><p>执行下面命令</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bundle install</span><br><span class="line">rails generate wechat:install</span><br><span class="line">rails g wechat:session</span><br><span class="line">rake db:migrate</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>参考文献 <a href="https://github.com/Eric-Guo/wechat" target="_blank" rel="noopener">WeChat</a></p>
-</li>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bundle install</span><br><span class="line">rails generate wechat:install</span><br><span class="line">rails g wechat:session</span><br><span class="line">rake db:migrate</span><br></pre></td></tr></table></figure></li>
+<li><p>参考文献 <a href="https://github.com/Eric-Guo/wechat" target="_blank" rel="noopener">WeChat</a></p></li>
 </ul>
-<h1 id="微信公众号后台配置"><a href="#微信公众号后台配置" class="headerlink" title="微信公众号后台配置"></a>微信公众号后台配置</h1><p>按照图示执行之后，点击测试，会发现测试失败。（后面将解决这个问题。）</p>
-<p><img src="http://i4.buimg.com/567571/024e90bd5e836c20.png" alt=""></p>
-<h1 id="配置自己的-Rails-工程"><a href="#配置自己的-Rails-工程" class="headerlink" title="配置自己的 Rails 工程"></a>配置自己的 Rails 工程</h1><ul>
+<h1 id="微信公众号后台配置">微信公众号后台配置</h1>
+<p>按照图示执行之后，点击测试，会发现测试失败。（后面将解决这个问题。）</p>
+<p><img src="http://i4.buimg.com/567571/024e90bd5e836c20.png" /></p>
+<h1 id="配置自己的-rails-工程">配置自己的 Rails 工程</h1>
+<ul>
 <li>新建 <code>confic/wechat.yml</code></li>
 <li>将 <code>confic/wechat.yml</code> 加入 <code>.gitignore</code></li>
 <li>在 <code>confic/wechat.yml</code> 输入</li>
@@ -237,23 +238,23 @@
 </ul>
 <figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- set <span class="symbol">:linked_files</span>, fetch(<span class="symbol">:linked_files</span>, []).push(<span class="string">'config/database.yml'</span>, <span class="string">'config/secrets.yml'</span>)</span><br><span class="line">+ set <span class="symbol">:linked_files</span>, fetch(<span class="symbol">:linked_files</span>, []).push(<span class="string">'config/database.yml'</span>, <span class="string">'config/secrets.yml'</span>,<span class="string">'config/wechat.yml'</span>)</span><br></pre></td></tr></table></figure>
 <p>这个是一个大坑，我在这里栽了半天。</p>
-<h1 id="加入功能"><a href="#加入功能" class="headerlink" title="加入功能"></a>加入功能</h1><p>在 WechatsController 中加入</p>
+<h1 id="加入功能">加入功能</h1>
+<p>在 WechatsController 中加入</p>
 <figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># default text responder when no other match</span></span><br><span class="line">on <span class="symbol">:text</span> <span class="keyword">do</span> <span class="params">|request, content|</span></span><br><span class="line">  request.reply.text <span class="string">"echo: <span class="subst">#&#123;content&#125;</span>"</span> <span class="comment"># Just echo</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># When receive 'help', will trigger this responder</span></span><br><span class="line">on <span class="symbol">:text</span>, <span class="symbol">with:</span> <span class="string">'help'</span> <span class="keyword">do</span> <span class="params">|request|</span></span><br><span class="line">  request.reply.text <span class="string">'help content'</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
 <p>这两个功能可以实现在微信公众号后台输入任意字串返回 <code>echo: 你输入的内容</code></p>
 <p>在后台输入 help 返回 <code>help content</code></p>
-<h1 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cap production deploy</span><br></pre></td></tr></table></figure>
-<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><ul>
+<h1 id="部署">部署</h1>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cap production deploy</span><br></pre></td></tr></table></figure>
+<h1 id="测试">测试</h1>
+<ul>
 <li>在第三步中的页面上点击测试，会发现测试成功。</li>
 <li>注册开发账号</li>
 </ul>
-<p><img src="http://i4.buimg.com/567571/d9a5662c971dc1bb.png" alt=""></p>
+<p><img src="http://i4.buimg.com/567571/d9a5662c971dc1bb.png" /></p>
 <ul>
 <li><p>在跳出来的界面中输入第三遍中的那几个参数</p>
-<p><img src="http://i1.piimg.com/567571/af8cf39dc4ef0ccc.png" alt=""></p>
-</li>
-</ul>
-<ul>
-<li>进入微信后台进行测试</li>
+<p><img src="http://i1.piimg.com/567571/af8cf39dc4ef0ccc.png" /></p></li>
+<li><p>进入微信后台进行测试</p></li>
 </ul>
 
     </div>
@@ -291,6 +292,7 @@
 
           </div>
           
+    <div class="comments" id="gitalk-container"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -337,7 +339,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前期准备"><span class="nav-number">1.</span> <span class="nav-text">前期准备</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安装-wechat-gem"><span class="nav-number">2.</span> <span class="nav-text">安装 wechat gem</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#微信公众号后台配置"><span class="nav-number">3.</span> <span class="nav-text">微信公众号后台配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置自己的-Rails-工程"><span class="nav-number">4.</span> <span class="nav-text">配置自己的 Rails 工程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#加入功能"><span class="nav-number">5.</span> <span class="nav-text">加入功能</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#部署"><span class="nav-number">6.</span> <span class="nav-text">部署</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#测试"><span class="nav-number">7.</span> <span class="nav-text">测试</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前期准备"><span class="nav-number">1.</span> <span class="nav-text">前期准备</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安装-wechat-gem"><span class="nav-number">2.</span> <span class="nav-text">安装 wechat gem</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#微信公众号后台配置"><span class="nav-number">3.</span> <span class="nav-text">微信公众号后台配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置自己的-rails-工程"><span class="nav-number">4.</span> <span class="nav-text">配置自己的 Rails 工程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#加入功能"><span class="nav-number">5.</span> <span class="nav-text">加入功能</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#部署"><span class="nav-number">6.</span> <span class="nav-text">部署</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#测试"><span class="nav-number">7.</span> <span class="nav-text">测试</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -449,6 +451,28 @@
   
 
   
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '6558feb2798d24a28a41',
+      clientSecret: '2aa963fa561889aa61a8ff066400a8e36c353439',
+      repo        : 'comments',
+      owner       : 'shaheming',
+      admin       : ['shaheming'],
+      id          : 'f090f2108c5202249ac67d87a9bde29a',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
 
 </body>
 </html>
